@@ -64,4 +64,27 @@ export class UsersController {
     await this.userService.deleteUser(userId);
     return 'OK';
   }
+
+  @Get()
+  async getAllUsers(): Promise<UserDto[]> {
+    const users = await this.userService.getAllUsers();
+    return users.map((user) => ({
+      id: user.id,
+      login: user.login,
+      secondName: user.secondName,
+      firstName: user.firstName,
+    }));
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Body('login') login: string, @Body('password') password: string) {
+    const isValid = await this.userService.validateUser(login, password);
+
+    if (!isValid) {
+      return 'Not OK';
+    }
+
+    return 'OK';
+  }
 }
