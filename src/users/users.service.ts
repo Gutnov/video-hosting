@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './models/user.model';
 import { CreateUserDto, UserDto } from './users.dto';
+import { hashPassword, comparePasswords } from './hash';
 
 export class DuplicateError extends Error {}
 
@@ -17,7 +18,7 @@ export class UsersService {
     if (existing)
       throw new DuplicateError('Пользователь с таким логином уже существует');
 
-    // const hashedPwd = await hashPassword(userDto.password);
+    const hashedPwd = await hashPassword(userDto.password);
 
     const newUser = await this.userRepository.create({
       ...userDto,
@@ -25,6 +26,10 @@ export class UsersService {
     });
 
     return newUser;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.findAll()
   }
 
   async getUser(id: number): Promise<User> {
@@ -39,5 +44,13 @@ export class UsersService {
   async deleteUser(userId: number): Promise<null> {
     await this.userRepository.destroy({ where: { id: userId } });
     return null;
+  }
+
+  async validateUser(login: string, password: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { login } });
+    if (!user) {
+      return false;
+    }
+    return await comparePasswords(password, user.password);
   }
 }
