@@ -22,7 +22,7 @@ export class UsersService {
 
     const newUser = await this.userRepository.create({
       ...userDto,
-      // password: hashedPwd,
+      password: hashedPwd,
     });
 
     return newUser;

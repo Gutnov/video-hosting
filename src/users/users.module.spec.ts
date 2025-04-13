@@ -36,7 +36,8 @@ describe('CRUD in UserService', () => {
   });
 
   beforeAll(async ()=>{
-    await User.create({login: "123", password: "123", firstName: "123"})
+    await User.create({login: "User1", password: "123", firstName: "Vasya", secondName: "Petrov"})
+    await User.create({login: "User2", password: "123", firstName: "Sahsha", secondName: "Ivanov"})
     // создаем 2 пользователя
   })
 
@@ -44,22 +45,38 @@ describe('CRUD in UserService', () => {
     return request(app.getHttpServer())
       .get('/users/1')
       .expect(200)
-      .expect({
-        data: "123",
-      });
+      .expect({id: 1, login: "User1", firstName: "Vasya", secondName: "Petrov"});
   });
 
   it('гет запрос на /дает список из 2 пользоывателей', async () => {
+    return request(app.getHttpServer())
+    .get('/users')
+    .expect(200)
+    .expect([
+      {id: 1, login: "User1", firstName: "Vasya", secondName: "Petrov"},
+      {id: 2, login: "User2", firstName: "Sahsha", secondName: "Ivanov"},
+    ]);
   });
 
   it('пост запрос с таким же логином как у первого падате с ошибкой ', async () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({login: "User1", password: "123", firstName: "Vasya", secondName: "Petrov"})
+      .expect(400)
   });
 
   it('пост запрос с новым логином возврщает имя пользователя ', async () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({login: "User3", password: "123", firstName: "Ilya", secondName: "Popov"})
+      .expect(201)
+      .expect({ id: 3, login: "User3", secondName: "Popov", firstName: "Ilya" })
   });
 
   it('пост запрос с пустым логином - возвращает ошибку ', async () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({login: "", password: "123", firstName: "Ilya", secondName: "Popov"})
+      .expect(400)
   });
-
-
 });
