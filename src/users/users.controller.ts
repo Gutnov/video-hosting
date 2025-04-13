@@ -21,6 +21,9 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(@Body() userDto: CreateUserDto): Promise<UserDto> {
+    if (!userDto.login) {
+      throw new BadRequestException('Login required');
+    }
     try {
       const newUser = await this.userService.createUser(userDto);
       return {
